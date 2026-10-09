@@ -3,5 +3,5 @@ name = "test-chat-tg-bot-python"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "python-telegram-bot>=22.8",
+    "aiogram>=3.31.0",
 ]

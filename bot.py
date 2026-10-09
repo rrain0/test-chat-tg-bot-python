@@ -1,35 +1,82 @@
+import asyncio
 import logging
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+import sys
+from aiogram import Bot, Dispatcher, F
+from aiogram.filters import CommandStart, Command
+from aiogram.types import Message, BotCommand
 
 from env import TG_BOT_TOKEN
 
-# Enable logging to keep track of errors or connection issues
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
 
-# Define the reaction to the /start command
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(
-        f"Hello {update.effective_user.first_name}! I am your Python bot. How can I help you today?"
+
+# Настройка логирования для отслеживания работы бота
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
+
+
+bot = Bot(token=TG_BOT_TOKEN)
+# Инициализируем диспетчер (главный роутер обновлений)
+dp = Dispatcher()
+
+
+
+async def set_main_menu(bot: Bot):
+    main_menu_commands = [
+        BotCommand(command="/start", description="Запустить бота"),
+        BotCommand(command="/hi", description="Поприветствовать бота"),
+        BotCommand(command="/user_info", description="Информация о пользователе"),
+    ]
+    await bot.set_my_commands(main_menu_commands)
+
+
+# Хэндлер на команду /start
+@dp.message(CommandStart())
+async def command_start_handler(message: Message) -> None:
+    # html.bold автоматически экранирует спецсимволы в имени пользователя
+    await message.answer(
+        f"Бот работает"
     )
 
-# Define an echo function that copies incoming user text messages
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    user_text = update.message.text
-    await update.message.reply_text(f"You said: {user_text}")
 
-if __name__ == '__main__':
-    # Initialize the application with your BotFather token
-    # REPLACE 'YOUR_TOKEN_HERE' with the actual string token from BotFather
-    app = ApplicationBuilder().token(TG_BOT_TOKEN).build()
+# Хэндлер на команду /hi
+@dp.message(Command('hi'))
+async def command_hi_handler(message: Message) -> None:
+    # html.bold автоматически экранирует спецсимволы в имени пользователя
+    await message.answer(
+        f"Hello {message.from_user.first_name}! I am your Python bot. How can I help you today?"
+    )
 
-    # Register the command and message handlers
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
-    # Start polling the Telegram servers for updates
+# Хэндлер на команду /user_info
+@dp.message(Command('user_info'))
+async def command_user_info_handler(message: Message) -> None:
+    await message.answer(
+        f"User info\n"
+        f"tg_user_id: {message.from_user.id}\n"
+        f"tg_username: {message.from_user.username}\n"
+        f"tg_first_name: {message.from_user.first_name}\n"
+        f"tg_last_name: {message.from_user.last_name}\n"
+        f"tg_chat_id: {message.chat.id}\n"
+    )
+
+
+
+# Хэндлер на любые текстовые сообщения (Эхо-функция)
+# Используем магический фильтр F.text, чтобы реагировать только на текст
+@dp.message(F.text)
+async def echo_handler(message: Message) -> None:
+    user_text = message.text
+    await message.answer(f"You said: {user_text}")
+
+
+
+async def main() -> None:
+    # Настраиваем меню команд
+    await set_main_menu(bot)
+    # Запускаем опрос серверов Telegram (Long Polling)
     print("Bot is running... Press Ctrl+C to stop.")
-    app.run_polling()
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
