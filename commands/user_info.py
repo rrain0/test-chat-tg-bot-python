@@ -8,7 +8,7 @@ user_info_router = Router()
 
 # /user_info
 @user_info_router.message(Command('user_info'))
-async def command_user_info_handler(message: Message) -> None:
+async def user_info_command_handler(message: Message) -> None:
     await message.answer(
         f"User info\n"
         f"tg_user_id: {message.from_user.id}\n"

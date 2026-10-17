@@ -4,11 +4,10 @@ from aiogram.filters import Command
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from pydantic import BaseModel
 from aiogram import Router
 
-from api_model.api_tg_user import ApiTgUser
-from api_model.api_user import ApiUser
+from backend_api_model.back_api_tg_user_to_login import BackApiTgUserToLogin
+from backend_api_model.back_api_user_logged_in import BackApiUserLoggedIn
 from env import BACKEND_API_URL
 from utils.tg_users import get_tg_user
 
@@ -22,19 +21,10 @@ class LoginStates(StatesGroup):
     waiting_for_login = State()  # Ожидаем ввод логина
     waiting_for_pwd = State()  # Ожидаем ввод пароля
 
-class ApiTgUserLogin(BaseModel):
-    login: str
-    pwd: str
-    tg_user: ApiTgUser
-
-class ApiUserLoggedIn(BaseModel):
-    access_token: str
-    user: ApiUser
-
 
 # /login
 @login_router.message(Command('login'))
-async def command_login_handler(message: Message, state: FSMContext) -> None:
+async def login_command_handler(message: Message, state: FSMContext) -> None:
     # Переводим пользователя в состояние ожидания логина
     await state.set_state(LoginStates.waiting_for_login)
     await message.answer("🔑 Введите логин:")
@@ -52,12 +42,12 @@ async def process_login(message: Message, state: FSMContext):
 
 @login_router.message(LoginStates.waiting_for_pwd, F.text)
 async def process_pwd(message: Message, state: FSMContext):
-    pwd = message.text
+    pwd: str = message.text
     #await message.edit_text("●●●●●●●●●●●●")
 
     # Достаем ранее сохраненные данные (там лежит наш login)
     user_data = await state.get_data()
-    login = user_data.get("login")
+    login: str = user_data.get("login")
 
     # Сразу очищаем состояние, чтобы пользователь мог снова пользоваться ботом
     await state.clear()
@@ -69,7 +59,7 @@ async def process_pwd(message: Message, state: FSMContext):
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{BACKEND_API_URL}/tg_user/login",
-                json=ApiTgUserLogin(
+                json=BackApiTgUserToLogin(
                     login=login,
                     pwd=pwd,
                     tg_user=get_tg_user(message),
@@ -78,7 +68,7 @@ async def process_pwd(message: Message, state: FSMContext):
             )
 
             if response.status_code == 200:
-                data = ApiUserLoggedIn.model_validate(response.json())
+                data = BackApiUserLoggedIn.model_validate(response.json())
 
                 await status_msg.edit_text(
                     f"✅ Вы успешно авторизовались!\n"
