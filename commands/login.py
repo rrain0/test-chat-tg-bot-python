@@ -47,10 +47,10 @@ async def process_pwd(message: Message, state: FSMContext):
 
     # Достаем ранее сохраненные данные (там лежит наш login)
     user_data = await state.get_data()
-    login: str = user_data.get("login")
+    login: str = user_data.pop("login")
 
-    # Сразу очищаем состояние, чтобы пользователь мог снова пользоваться ботом
-    await state.clear()
+    # Сразу очищаем контекст, чтобы пользователь мог снова пользоваться ботом
+    await state.set_state(None)
 
     # Отправляем сообщение-индикатор загрузки (пользователь поймет, что бот думает)
     status_msg = await message.answer("🔄 Вхожу в аккаунт...")
@@ -70,6 +70,7 @@ async def process_pwd(message: Message, state: FSMContext):
             if response.status_code == 200:
                 data = BackApiUserLoggedIn.model_validate(response.json())
 
+                await state.update_data(access_token=data.access_token)
                 await status_msg.edit_text(
                     f"✅ Вы успешно авторизовались!\n"
                     f"user_login: {data.user.login}"
@@ -80,8 +81,8 @@ async def process_pwd(message: Message, state: FSMContext):
                 # Если бэкенд вернул 401 Unauthorized или 400
                 await status_msg.edit_text(
                     "❌ Неверный логин или пароль.\n"
-                    "Попробуйте снова: /login\n"
-                    "Или зарегистрируйтесь: /signup"
+                    "Войти: /login\n"
+                    "Зарегистрироваться: /signup\n"
                 )
 
     except Exception as e:
