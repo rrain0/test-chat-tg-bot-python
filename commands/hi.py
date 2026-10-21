@@ -8,8 +8,8 @@ hi_router = Router()
 
 # /hi
 @hi_router.message(Command('hi'))
-async def hi_command_handler(message: Message) -> None:
+async def hi_command_handler(tg_msg: Message) -> None:
     # html.bold автоматически экранирует спецсимволы в имени пользователя
-    await message.answer(
-        f"Hello {message.from_user.first_name}! I am your Python bot. How can I help you today?"
+    await tg_msg.answer(
+        f"Hello {tg_msg.from_user.first_name}! I am your Python bot. How can I help you today?"
     )

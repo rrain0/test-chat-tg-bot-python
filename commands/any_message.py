@@ -21,29 +21,29 @@ async def post_to_backend(endpoint: str, access_token: str, payload: dict):
 # Хэндлер на любые текстовые сообщения (Эхо-функция)
 # Используем магический фильтр F.text, чтобы реагировать только на текст
 @any_message_router.message(F.text)
-async def send_message(message: Message, state: FSMContext) -> None:
+async def any_message(tg_msg: Message, state: FSMContext) -> None:
     access_token = (await state.get_data()).get("access_token")
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            f"{BACKEND_API_URL}{"/tg_user/message"}",
-            json={"message_text": message.text},
+            f"{BACKEND_API_URL}{"/tg_user/msg"}",
+            json={"msg_text": tg_msg.text},
             headers={"Authorization": f"Bearer {access_token}"}
         )
 
         if response.status_code == 200:
-            await message.answer("✅ Сообщение успешно отправлено")
+            await tg_msg.answer("✅ Сообщение успешно отправлено")
             return
 
         if response.status_code == 401:
-            await message.answer(
+            await tg_msg.answer(
                 "❌ Ошибка: Вход не выполнен\n"
                 "Войти: /login\n"
                 "Зарегистрироваться: /signup\n"
             )
             return
 
-        await message.answer("❌ unexpected error")
+        await tg_msg.answer("❌ unexpected error")
 
 
 

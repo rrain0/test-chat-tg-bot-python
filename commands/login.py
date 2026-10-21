@@ -24,26 +24,26 @@ class LoginStates(StatesGroup):
 
 # /login
 @login_router.message(Command('login'))
-async def login_command_handler(message: Message, state: FSMContext) -> None:
+async def login_command_handler(tg_msg: Message, state: FSMContext) -> None:
     # Переводим пользователя в состояние ожидания логина
     await state.set_state(LoginStates.waiting_for_login)
-    await message.answer("🔑 Введите логин:")
+    await tg_msg.answer("🔑 Введите логин:")
 
 
 @login_router.message(LoginStates.waiting_for_login, F.text)
-async def process_login(message: Message, state: FSMContext):
+async def process_login(tg_msg: Message, state: FSMContext):
     # Сохраняем введенный логин во временное хранилище FSM (in-memory storage)
-    await state.update_data(login=message.text)
+    await state.update_data(login=tg_msg.text)
 
     # Переводим в следующее состояние — ожидание пароля
     await state.set_state(LoginStates.waiting_for_pwd)
-    await message.answer("🔒 Введите пароль:")
+    await tg_msg.answer("🔒 Введите пароль:")
 
 
 @login_router.message(LoginStates.waiting_for_pwd, F.text)
-async def process_pwd(message: Message, state: FSMContext):
-    pwd: str = message.text
-    #await message.edit_text("●●●●●●●●●●●●")
+async def process_pwd(tg_msg: Message, state: FSMContext):
+    pwd: str = tg_msg.text
+    #await tg_msg.edit_text("●●●●●●●●●●●●")
 
     # Достаем ранее сохраненные данные (там лежит наш login)
     user_data = await state.get_data()
@@ -53,7 +53,7 @@ async def process_pwd(message: Message, state: FSMContext):
     await state.set_state(None)
 
     # Отправляем сообщение-индикатор загрузки (пользователь поймет, что бот думает)
-    status_msg = await message.answer("🔄 Вхожу в аккаунт...")
+    status_msg = await tg_msg.answer("🔄 Вхожу в аккаунт...")
 
     try:
         async with httpx.AsyncClient() as client:
@@ -62,7 +62,7 @@ async def process_pwd(message: Message, state: FSMContext):
                 json=BackApiTgUserToLogin(
                     login=login,
                     pwd=pwd,
-                    tg_user=get_tg_user(message),
+                    tg_user=get_tg_user(tg_msg),
                 ).model_dump(),
                 timeout=10.0,
             )

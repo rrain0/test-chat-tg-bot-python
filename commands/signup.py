@@ -26,23 +26,23 @@ class SignupStates(StatesGroup):
 
 # /signup
 @signup_router.message(Command('signup'))
-async def signup_command_handler(message: Message, state: FSMContext) -> None:
+async def signup_command_handler(tg_msg: Message, state: FSMContext) -> None:
     # Переводим пользователя в состояние ожидания логина
     await state.set_state(SignupStates.waiting_for_login)
-    await message.answer(
+    await tg_msg.answer(
         "🔑 Введите логин.\n"
         "Длина логина должна быть в диапазоне от 1 до 30 символов.\n"
     )
 
 
 @signup_router.message(SignupStates.waiting_for_login, F.text)
-async def process_login(message: Message, state: FSMContext):
-    login: str = message.text
+async def process_login(tg_msg: Message, state: FSMContext):
+    login: str = tg_msg.text
 
     try:
         validate_user_to_signup_login(login)
     except:
-        await message.answer(
+        await tg_msg.answer(
             "❌ Некорректный формат.\n"
             "Длина логина должна быть в диапазоне от 8 до 30 символов.\n"
             "\n"
@@ -55,7 +55,7 @@ async def process_login(message: Message, state: FSMContext):
 
     # Переводим в следующее состояние — ожидание пароля
     await state.set_state(SignupStates.waiting_for_pwd)
-    await message.answer(
+    await tg_msg.answer(
         "🔒 Введите пароль.\n"
         "Длина пароля должна быть в диапазоне от 8 до 100 символов.\n"
         "Пароль должен содержать цифры и не цифры.\n"
@@ -63,14 +63,14 @@ async def process_login(message: Message, state: FSMContext):
 
 
 @signup_router.message(SignupStates.waiting_for_pwd, F.text)
-async def process_pwd(message: Message, state: FSMContext):
-    pwd: str = message.text
-    #await message.edit_text("●●●●●●●●●●●●")
+async def process_pwd(tg_msg: Message, state: FSMContext):
+    pwd: str = tg_msg.text
+    #await tg_msg.edit_text("●●●●●●●●●●●●")
 
     try:
         validate_user_to_signup_pwd(pwd)
     except:
-        await message.answer(
+        await tg_msg.answer(
             "❌ Некорректный формат.\n"
             "Длина пароля должна быть в диапазоне от 8 до 100 символов.\n"
             "Пароль должен содержать цифры и не цифры.\n"
@@ -87,7 +87,7 @@ async def process_pwd(message: Message, state: FSMContext):
     await state.set_state(None)
 
     # Отправляем сообщение-индикатор загрузки (пользователь поймет, что бот думает)
-    status_msg = await message.answer("🔄 Вхожу в аккаунт...")
+    status_msg = await tg_msg.answer("🔄 Вхожу в аккаунт...")
 
     try:
         async with httpx.AsyncClient() as client:
@@ -96,7 +96,7 @@ async def process_pwd(message: Message, state: FSMContext):
                 json=BackApiTgUserToSignup(
                     login=login,
                     pwd=pwd,
-                    tg_user=get_tg_user(message),
+                    tg_user=get_tg_user(tg_msg),
                 ).model_dump(),
                 timeout=10.0,
             )
