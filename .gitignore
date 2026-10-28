@@ -1,1 +1,4 @@
-./deploy-dev/test-chat.tg-bot-python.dev.tg.env
+deploy-dev/test-chat.tg-bot-python.dev.tg.env
+
+
+**/__pycache__/
