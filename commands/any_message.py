@@ -35,7 +35,7 @@ async def any_message(tg_msg: Message, state: FSMContext) -> None:
 
         if response.status_code == 401:
             await tg_msg.answer(
-                "❌ Ошибка: Вход не выполнен\n"
+                "⚠️ Ошибка: Вход не выполнен\n"
                 "Войти: /login\n"
                 "Зарегистрироваться: /signup\n"
             )

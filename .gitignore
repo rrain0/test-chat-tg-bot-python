@@ -1,4 +1,6 @@
-deploy-dev/test-chat.tg-bot-python.dev.tg.env
+.env
+.env.*
+!.env.*.example
 
 
 **/__pycache__/

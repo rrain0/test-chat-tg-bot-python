@@ -1,4 +1,3 @@
-import os
 import httpx
 from aiogram import F
 from aiogram.filters import Command
