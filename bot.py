@@ -10,9 +10,7 @@ from commands.login import login_router
 from commands.signup import signup_router
 from commands.start import start_router
 from commands.user_info import user_info_router
-from env import TG_BOT_TOKEN
-
-
+from services.env.env import TG_BOT_TOKEN
 
 # Настройка логирования для отслеживания работы бота
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)

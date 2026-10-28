@@ -1,3 +1,4 @@
+import os
 import httpx
 from aiogram import F
 from aiogram.filters import Command
@@ -10,7 +11,7 @@ from backend_api_model.back_api_tg_user_to_signup import BackApiTgUserToSignup
 from backend_api_model.back_api_user_logged_in import BackApiUserLoggedIn
 from backend_validators.validate_user_to_signup_login import validate_user_to_signup_login
 from backend_validators.validate_user_to_signup_pwd import validate_user_to_signup_pwd
-from env import BACKEND_API_URL
+from services.env.env import BACKEND_API_URL
 from utils.tg_users import get_tg_user
 
 

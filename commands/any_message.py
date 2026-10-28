@@ -3,9 +3,7 @@ from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from env import BACKEND_API_URL
-
-
+from services.env.env import BACKEND_API_URL
 
 any_message_router = Router()
 
