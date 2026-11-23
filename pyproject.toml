@@ -1,10 +1,13 @@
 [project]
 name = "test-chat-tg-bot-python"
 version = "0.1.0"
-requires-python = ">=3.13"
+requires-python = "==3.14.8"
 dependencies = [
-    "aiogram>=3.31.0",
-    "httpx>=0.28.1",
-    "pydantic>=2.13.5",
-    "pyjwt[crypto]>=2.15.1",
+    "aiogram==3.34.0",
+    "httpx==0.28.1",
+    "pydantic==2.14.1",
+    "pydantic-core==2.50.1",
+    "pyjwt[crypto]==2.15.1",
 ]
+[tool.uv]
+add-bounds = "exact"
