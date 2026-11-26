@@ -7,7 +7,7 @@ from aiogram.types import Message
 
 from core.config.env import BACKEND_API_URL
 from shared.backend.modules.msg.api_model.msg_text import BackApiMsgText
-from shared.backend.modules.session.tg_bot.jwt_access.create_tg_bot_access_token import create_tg_bot_access_token
+from shared.backend.modules.session_tg_bot.jwt_access.create import create_tg_bot_access_token
 from shared.utils.datetimes.now import now
 from shared.utils.telegrams.get_telegram_user import get_telegram_user
 

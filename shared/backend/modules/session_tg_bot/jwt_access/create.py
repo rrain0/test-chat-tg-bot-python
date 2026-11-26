@@ -4,7 +4,7 @@ from uuid import UUID
 import jwt
 
 from core.config.env import TG_BOT_ACCESS_TOKEN_LIFETIME, TG_BOT_ACCESS_TOKEN_SECRET
-from shared.backend.modules.session.tg_bot.jwt_access.tg_bot_access_token import TgBotAccessToken
+from shared.backend.modules.session_tg_bot.jwt_access.token import TgBotAccessToken
 
 
 def create_tg_bot_access_token(

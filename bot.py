@@ -23,8 +23,8 @@ logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 async def on_startup(dispatcher: Dispatcher):
     logging.info("Инициализация httpx.AsyncClient...")
 
-    # Создаем один клиент на всё время работы бота
-    # Настраиваем базовый URL и заголовки, чтобы не дублировать их в запросах
+    # Создаем один клиент на всё время работы бота.
+    # Настраиваем базовый URL и заголовки, чтобы не дублировать их в запросах.
     #headers = {"X-Bot-Token": API_SECRET_TOKEN}
     back_http_client = httpx.AsyncClient(
         base_url=BACKEND_API_URL,

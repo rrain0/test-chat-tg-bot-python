@@ -6,8 +6,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram import Router
 
-from shared.backend.modules.tg_user.api_model.tg_user_to_login import BackApiTgUserToLogin
-from shared.backend.modules.user.api_model.user_logged_in import BackApiUserLoggedIn
+from shared.backend.modules.tg_user.api_model.to_login import BackApiTgUserToLogin
+from shared.backend.modules.user.api_model.logged_in import BackApiUserLoggedIn
 from core.config.env import BACKEND_API_URL
 from shared.utils.telegrams.get_telegram_user import get_telegram_user
 
@@ -24,29 +24,29 @@ class LoginStates(StatesGroup):
 
 # /login
 @router_login.message(Command("login"))
-async def on_login_command(tg_msg: Message, state: FSMContext) -> None:
+async def on_login_command(telegram_msg: Message, state: FSMContext) -> None:
     # Transition the user to the login-awaiting state
     await state.set_state(LoginStates.waiting_for_login)
-    await tg_msg.answer("🔑 Введите логин:")
+    await telegram_msg.answer("🔑 Введите логин:")
 
 
 @router_login.message(LoginStates.waiting_for_login, F.text)
-async def process_login(tg_msg: Message, state: FSMContext):
+async def process_login(telegram_msg: Message, state: FSMContext):
     # Save the entered login into FSM (in-memory storage) temp storage
-    await state.update_data(login=tg_msg.text)
+    await state.update_data(login=telegram_msg.text)
 
     # Transition to the next state - waiting for a password
     await state.set_state(LoginStates.waiting_for_pwd)
-    await tg_msg.answer("🔒 Введите пароль:")
+    await telegram_msg.answer("🔒 Введите пароль:")
 
 
 @router_login.message(LoginStates.waiting_for_pwd, F.text)
 async def process_pwd(
-        tg_msg: Message,
+        telegram_msg: Message,
         state: FSMContext,
         back_http_client: httpx.AsyncClient,
 ):
-    pwd: str = tg_msg.text
+    pwd: str = telegram_msg.text
     #await tg_msg.edit_text("●●●●●●●●●●●●")
 
     # Retrieve previously saved data (the login)
@@ -56,8 +56,8 @@ async def process_pwd(
     # Clear the context immediately for the user be able to use bot again
     await state.set_state(None)
 
-    # Отправляем сообщение-индикатор загрузки (пользователь поймет, что бот думает)
-    status_msg = await tg_msg.answer("⏳⏳⏳ Вхожу в аккаунт...")
+    # Send status message to show user the bot is processing data
+    status_msg = await telegram_msg.answer("⏳⏳⏳ Вхожу в аккаунт...")
 
     try:
         response = await back_http_client.post(
@@ -65,7 +65,7 @@ async def process_pwd(
             json=BackApiTgUserToLogin(
                 login=login,
                 pwd=pwd,
-                tg_user=get_telegram_user(tg_msg),
+                tg_user=get_telegram_user(telegram_msg),
             ).model_dump(),
             timeout=10.0,
         )
@@ -76,8 +76,10 @@ async def process_pwd(
             await state.update_data(access_token=data.access_token)
             await status_msg.edit_text(
                 f"✅ Вы успешно авторизовались!\n"
-                f"user_login: {data.user.username}"
                 f"user_id: {data.user.id}\n"
+                f"user_username: {data.user.username}\n"
+                f"tg_user_id: {get_telegram_user(telegram_msg).id}\n"
+                f"tg_user_username: {get_telegram_user(telegram_msg).username}\n"
                 f"access_token: {data.access_token}\n"
             )
         else:

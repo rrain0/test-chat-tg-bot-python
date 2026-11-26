@@ -6,10 +6,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram import Router
 
-from shared.backend.modules.tg_user.api_model.user_to_signup import BackApiTgUserToSignup
-from shared.backend.modules.user.api_model.user_logged_in import BackApiUserLoggedIn
-from shared.backend.modules.validators.validate_user_to_signup_login import validate_user_to_signup_username
-from shared.backend.modules.validators.validate_user_to_signup_pwd import validate_user_to_signup_pwd
+from shared.backend.modules.tg_user.api_model.to_signup import BackApiTgUserToSignup
+from shared.backend.modules.user.api_model.logged_in import BackApiUserLoggedIn
+from shared.backend.modules.user.validators.user_to_signup_username import validate_user_to_signup_username
+from shared.backend.modules.user.validators.user_to_signup_pwd import validate_user_to_signup_pwd
 from core.config.env import BACKEND_API_URL
 from shared.utils.telegrams.get_telegram_user import get_telegram_user
 
